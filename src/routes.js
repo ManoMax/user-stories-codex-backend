@@ -7,4 +7,6 @@ router.post('/users', TestController.store);
 
 router.get('/users', TestController.index);
 
+router.get('/user/:urlUser', TestController.userPage);
+
 module.exports = router;

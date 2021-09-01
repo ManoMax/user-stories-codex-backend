@@ -30,7 +30,11 @@ const UserSchema = new Schema({
         type: String,
         required: false,
         default: null
-    }
+    },
+    urlUser: {
+        type: String,
+        required: false
+    },
 },
     {
         timestamps: true,

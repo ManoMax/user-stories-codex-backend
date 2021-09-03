@@ -1,19 +1,20 @@
 const User = require('../model/User');
 const Page = require('../model/Page');
+const jwt = require('jsonwebtoken');
 
 const TestController = {
   helloWorld(req, res) {
     res.send('Hello World')
   },
 
-  async index(request, response) {
+  async index(req, res) {
     const users = await User.find();
 
-    return response.json(users);
+    return res.json(users);
   },
 
-  async store(request, response) {
-    const { name, email, password } = request.body;
+  async store(req, res) {
+    const { name, email, password } = req.body;
 
     let user = await User.findOne({ email });
 
@@ -29,20 +30,52 @@ const TestController = {
       });
 
       page = await Page.create({
-        urlUser
+        urlUser,
+        userID: user._id
       })
     }
 
-    return response.json(user);
+    return res.json(user);
   },
 
-  async userPage(request, response) {
-    const urlUser = request.params.urlUser;
+  async userPage(req, res) {
+    const urlUser = req.params.urlUser;
 
     let page = await Page.findOne({ urlUser });
 
-    return response.json(page);
+    return res.json(page);
   },
+
+  async login(req, res) {
+    const { email, password } = req.body;
+    
+    let user = await User.findOne({ email, password });
+
+    if (!(!user)) {
+      let idUser = user._id;
+      const token = jwt.sign({ idUser }, process.env.SECRET, {
+        expiresIn: 60 * 60 // expires in 60min
+      });
+      return res.json({ auth: true, token: token });
+    }
+
+    res.status(500).json({message: 'Login inválido!'});
+  },
+
+  async setTelefone(req, res) {
+    const { telefone } = req.body;
+    const urlUser = req.params.urlUser;
+
+    let page = await Page.findOne({ urlUser });
+
+    if (page.userID === req.userId) {
+      page = await Page.updateOne({
+        telefone: telefone
+      })
+      return res.status(200).json({message: 'Telefone alterado com sucesso.' });
+      }
+    return res.status(401).json({message: 'Usuário não tem permissão.' });
+  }
 };
 
 module.exports = TestController;

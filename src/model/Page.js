@@ -5,6 +5,10 @@ const PageSchema = new Schema({
         type: String,
         required: true
     },
+    userID: {
+        type: String,
+        required: true
+    },
     telefone: {
         type: String,
         required: false,
@@ -18,7 +22,7 @@ const PageSchema = new Schema({
     cargoAtual: {
         type: String,
         required: false,
-        default: "Trainee"
+        default: "membro"
     },
     especialidades: {
         type: [String]

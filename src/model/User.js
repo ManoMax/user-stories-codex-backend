@@ -35,6 +35,11 @@ const UserSchema = new Schema({
         type: String,
         required: false
     },
+    token_list: {
+        type: [String],
+        required: false,
+        default: []
+    }
 },
     {
         timestamps: true,

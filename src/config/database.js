@@ -1,12 +1,16 @@
 const mongoose = require('mongoose');
 const config = require('@config');
 
-module.exports = () =>  {
+module.exports = async () =>  {
     let DB_URL;
     if (process.env.NODE_ENV === "prod") {
         DB_URL = config.db.production;
     } else if (process.env.NODE_ENV === "dev") {
         DB_URL = config.db.develop;
+    } else {
+        const MongoInMemory = require('mongodb-memory-server');
+        mongoServer = new MongoInMemory.MongoMemoryServer();
+        DB_URL = await mongoServer.getUri()
     }
     
     mongoose.set('useFindAndModify', false);

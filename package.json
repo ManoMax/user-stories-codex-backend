@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "NODE_ENV=prod node src/server.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "mocha test/test.js -r chai/register-assert",
     "dev": "NODE_ENV=dev nodemon src/server.js"
   },
   "author": "",
@@ -18,6 +18,7 @@
     "dotenv-safe": "^8.2.0",
     "express": "^4.17.1",
     "jsonwebtoken": "^8.5.1",
+    "mocha": "^9.1.1",
     "module-alias": "^2.2.2",
     "mongoose": "^5.11.13",
     "nodemailer": "^6.4.17",
@@ -33,7 +34,7 @@
     "@model": "src/model"
   },
   "devDependencies": {
-    "chai": "^4.2.0",
+    "chai": "^4.3.4",
     "chai-http": "^4.3.0",
     "eslint": "^7.18.0",
     "mongodb-memory-server": "^6.9.3"

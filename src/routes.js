@@ -10,9 +10,9 @@ router.get('/users', TestController.index);
 
 router.get('/user/:urlUser', TestController.userPage);
 
-router.post('/user/signIn', TestController.login);
+router.post('/signIn', TestController.login);
 
-router.post('/user/signOut', auth.authorizeUser, TestController.logout);
+router.get('/signOut', auth.authorizeUser, TestController.logout);
 
 router.post('/user/:urlUser/setPerfil', auth.authorizeUser, TestController.setPerfil);
 

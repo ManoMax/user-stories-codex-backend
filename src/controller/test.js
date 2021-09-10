@@ -2,15 +2,21 @@ const User = require('../model/User');
 const Page = require('../model/Page');
 const jwt = require('jsonwebtoken');
 
+const HTTP_CODE_OK = 200;
+const HTTP_CODE_CREATED = 201;
+const HTTP_CODE_BAD_REQUEST = 400;
+const HTTP_CODE_UNAUTHORIZED = 401;
+const HTTP_CODE_NOT_FOUND = 404;
+
 const TestController = {
   helloWorld(req, res) {
-    res.status(200).send( { confirm: 'Hello World' })
+    res.status(HTTP_CODE_OK).send( { confirm: 'Hello World' })
   },
 
   async index(req, res) {
     const users = await User.find();
 
-    return res.json(users);
+    return res.status(HTTP_CODE_OK).json(users);
   },
 
   async store(req, res) {
@@ -18,7 +24,7 @@ const TestController = {
 
     if (name === undefined ||
       email === undefined ||
-      password === undefined) return res.status(401).json({ message: 'Preencha todos os campos.' });
+      password === undefined) return res.status(HTTP_CODE_BAD_REQUEST).json({ message: 'Preencha todos os campos.' });
 
     let user = await User.findOne({ email });
 
@@ -37,9 +43,11 @@ const TestController = {
         urlUser,
         userID: user._id
       })
-    }
 
-    return res.json(user);
+      return res.status(HTTP_CODE_CREATED).json(user);
+    } else {
+      return res.status(HTTP_CODE_BAD_REQUEST).json({ message: 'E-mail já cadastrado.' });
+    }
   },
 
   async userPage(req, res) {
@@ -47,18 +55,24 @@ const TestController = {
 
     let page = await Page.findOne({ urlUser });
 
-    return res.json(page);
+    if (!page) {
+      return res.status(HTTP_CODE_NOT_FOUND).json({ message: 'Perfil não encontrado.' });
+    } else {
+      return res.status(HTTP_CODE_OK).json(page);
+    }
   },
 
   async login(req, res) {
     const { email, password } = req.body;
 
     if (email === undefined ||
-      password === undefined) return res.status(401).json({ message: 'Preencha todos os campos.' });
+      password === undefined) return res.status(HTTP_CODE_BAD_REQUEST).json({ message: 'Preencha todos os campos.' });
 
     let user = await User.findOne({ email, password });
 
-    if (!(!user)) {
+    if (!user) {
+      return res.status(HTTP_CODE_UNAUTHORIZED).json({ message: 'Login inválido!' });
+    } else {
       let idUser = user._id;
       const token = jwt.sign({ idUser }, process.env.JWT_SECRET, {
         expiresIn: 60 * 60 // expires in 60min
@@ -66,25 +80,23 @@ const TestController = {
 
       let new_token_list = user.token_list;
       new_token_list.push(token);
-      user = await User.updateOne({
+      user = await User.findByIdAndUpdate(user._id, {
         token_list: new_token_list
       });
 
-      return res.json({ auth: true, token: `Bearer ` + token });
+      return res.status(HTTP_CODE_OK).json({ auth: true, token: `Bearer ` + token });
     }
-
-    res.status(404).json({ message: 'Login inválido!' });
   },
 
   async logout(req, res) {
     let user = req.user;
     new_token_list = user.token_list.remove(req.token);
 
-    user = await User.updateOne({
+    user = await User.findByIdAndUpdate(user._id, {
       token_list: new_token_list
     });
 
-    return res.status(200).json({message: 'User has logout.' });
+    return res.status(HTTP_CODE_OK).json({message: 'User has logout.' });
   },
 
   async setPerfil(req, res) {
@@ -92,17 +104,21 @@ const TestController = {
     const { telefone } = req.body;
     const urlUser = req.params.urlUser;
 
-    if (telefone === undefined) return res.status(401).json({ message: 'Preencha algum dos campos.' });
+    if (telefone === undefined) return res.status(HTTP_CODE_BAD_REQUEST).json({ message: 'Preencha algum dos campos.' });
 
     let page = await Page.findOne({ urlUser });
 
+    if (!page) {
+      return res.status(HTTP_CODE_BAD_REQUEST).json({ message: 'Perfil não encontrado.' });
+    }
+
     if (page.userID === req.userId) {
-      page = await Page.updateOne({
+      page = await Page.findByIdAndUpdate(page._id, {
         telefone: telefone
       })
-      return res.status(200).json({ message: 'Perfil alterado com sucesso.' });
+      return res.status(HTTP_CODE_OK).json({ message: 'Perfil alterado com sucesso.' });
     }
-    return res.status(401).json({ message: 'Usuário não tem permissão.' });
+    return res.status(HTTP_CODE_UNAUTHORIZED).json({ message: 'Usuário não tem permissão.' });
   }
 };
 

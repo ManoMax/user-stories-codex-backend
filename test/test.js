@@ -13,13 +13,12 @@ const HTTP_CODE_UNAUTHORIZED = 401;
 const HTTP_CODE_NOT_FOUND = 404;
 
 chai.use(chai_http);
+let token_aux;
 
 describe('Auth module', async function () {
     before(async () => {
         // mongoServer = new MongoInMemory.MongoMemoryServer();
         databaseConfig() // await mongoServer.getUri()
-        let token_aux1;
-        let token_aux2;
     });
 
     it('Teste de Timeout menor que 500ms', function (done) {
@@ -174,8 +173,8 @@ describe('Auth module', async function () {
                 response.body.should.have.not.property('user');
                 response.body.should.have.not.property('password');
                 token_aux = response.body.token;
-                done()
-            })
+                done();
+            });
     });
 
     it('Get Page de um usuário não cadastrado', function (done) {

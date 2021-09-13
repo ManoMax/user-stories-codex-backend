@@ -68,23 +68,27 @@ const TestController = {
     if (email === undefined ||
       password === undefined) return res.status(HTTP_CODE_BAD_REQUEST).json({ message: 'Preencha todos os campos.' });
 
-    let user = await User.findOne({ email, password });
+    let user = await User.findOne({ email });
 
     if (!user) {
-      return res.status(HTTP_CODE_UNAUTHORIZED).json({ message: 'Login inválido!' });
+      return res.status(HTTP_CODE_UNAUTHORIZED).json({ message: 'Email não cadastrado' });
     } else {
-      let idUser = user._id;
-      const token = jwt.sign({ idUser }, process.env.JWT_SECRET, {
-        expiresIn: 60 * 60 // expires in 60min
-      });
-
-      let new_token_list = user.token_list;
-      new_token_list.push(token);
-      user = await User.findByIdAndUpdate(user._id, {
-        token_list: new_token_list
-      });
-
-      return res.status(HTTP_CODE_OK).json({ auth: true, token: `Bearer ` + token });
+      if (user.password === password) {
+        let idUser = user._id;
+        const token = jwt.sign({ idUser }, process.env.JWT_SECRET, {
+          expiresIn: 60 * 60 // expires in 60min
+        });
+  
+        let new_token_list = user.token_list;
+        new_token_list.push(token);
+        user = await User.findByIdAndUpdate(user._id, {
+          token_list: new_token_list
+        });
+  
+        return res.status(HTTP_CODE_OK).json({ auth: true, token: `Bearer ` + token });
+      } else {
+        return res.status(HTTP_CODE_UNAUTHORIZED).json({ message: 'Senha inválida' });
+      }
     }
   },
 

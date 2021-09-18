@@ -1,19 +1,26 @@
 const router = require('express').Router();
-const TestController = require('@controller/test');
+const UserController = require('@controller/userController');
+const ProjectController = require('@controller/projectController');
 const auth = require('./middlewares/Auth')
 
-router.get('/', TestController.helloWorld);
+router.get('/', auth.authorizeUser, UserController.home);
 
-router.post('/user/signUp', TestController.store);
+router.post('/signUp', UserController.store);
 
-router.get('/users', TestController.index);
+// router.get('/users', UserController.index);
 
-router.get('/user/:urlUser', TestController.userPage);
+router.post('/signIn', UserController.login);
 
-router.post('/signIn', TestController.login);
+router.get('/signOut', auth.authorizeUser, UserController.logout);
 
-router.get('/signOut', auth.authorizeUser, TestController.logout);
+router.get('/user/:urlUser', auth.authorizeUser, UserController.userPage);
 
-router.post('/user/:urlUser/setPerfil', auth.authorizeUser, TestController.setPerfil);
+router.post('/user/:urlUser/setPerfil', auth.authorizeUser, UserController.setPerfil);
+
+router.get('/projects', auth.authorizeUser, ProjectController.index);
+
+router.post('/signUpProject', auth.authorizeUser, ProjectController.store);
+
+router.post('/setProject', auth.authorizeUser, ProjectController.setProject);
 
 module.exports = router;

@@ -14,6 +14,7 @@ const HTTP_CODE_NOT_FOUND = 404;
 
 chai.use(chai_http);
 let token_aux;
+let token_aux2;
 
 describe('Auth module', async function () {
     before(async () => {
@@ -92,14 +93,12 @@ describe('Auth module', async function () {
             .send({
                 "name": "Mano Max",
                 "email": "gabrielmax@codexjr.com.br",
-                "password": "123456"
+                "password": "123456",
+                "cargoAtual": "squaad"
             })
             .end(function (err, response) {
                 response.should.have.status(HTTP_CODE_CREATED);
-                response.body.should.have.property('_id');
-                response.body.should.have.property('urlUser', "manomax");
-                response.body.should.have.property('email', "gabrielmax@codexjr.com.br");
-                response.body.should.have.property('password', "123456");
+                response.body.should.have.property('message', "E-mail cadastrado com sucesso.");
                 done();
             })
     });
@@ -191,16 +190,19 @@ describe('Auth module', async function () {
             .get('/user/manomax')
             .end(function (err, response) {
                 response.should.have.status(HTTP_CODE_OK);
-                response.body.should.have.property('redesSociais');
+                response.body.should.have.property('name');
+                response.body.should.have.property('email');
                 response.body.should.have.property('telefone', null);
                 response.body.should.property('telefone').equals(null);
                 response.body.should.have.property('foto');
                 response.body.should.have.property('cargoAtual');
                 response.body.should.have.property('especialidades');
+                response.body.should.have.property('instagram');
+                response.body.should.have.property('linkedin');
+                response.body.should.have.property('aniversário');
                 response.body.should.have.property('cpf');
-                response.body.should.have.property('_id');
-                response.body.should.have.property('userID');
                 response.body.should.have.property('urlUser');
+                response.body.should.have.not.property('_id');
                 done();
             })
     });
@@ -265,14 +267,12 @@ describe('Auth module', async function () {
             .send({
                 "name": "Felipe Leão",
                 "email": "felipeleao@codexjr.com.br",
-                "password": "reidaselva"
+                "password": "reidaselva",
+                "cargoAtual": "membro"
             })
             .end(function (err, response) {
                 response.should.have.status(HTTP_CODE_CREATED);
-                response.body.should.have.property('_id');
-                response.body.should.have.property('urlUser', "felipeleao");
-                response.body.should.have.property('email', "felipeleao@codexjr.com.br");
-                response.body.should.have.property('password', "reidaselva");
+                response.body.should.have.property('message', "E-mail cadastrado com sucesso.");
                 done();
             })
     });
@@ -286,6 +286,24 @@ describe('Auth module', async function () {
                 response.body.should.have.lengthOf(2);
                 done();
             })
+    });
+
+    it('Login com credenciais corretas (felipeleao)', function (done) {
+        const correct_email = "felipeleao@codexjr.com.br";
+        chai.request(server)
+            .post('/signIn')
+            .send({ "email": correct_email, "password": "reidaselva" })
+            .end(function (err, response) {
+                response.should.have.status(HTTP_CODE_OK);
+                response.body.should.have.property('auth');
+                response.body.should.have.property('auth').to.be.a('boolean');
+                response.body.should.have.property('token');
+                response.body.should.have.property('token').to.be.a('string');
+                response.body.should.have.not.property('user');
+                response.body.should.have.not.property('password');
+                token_aux2 = response.body.token;
+                done();
+            });
     });
 
     it('Set perfil de felipeleao (telefone) com token de outro usuario (manomax)', function (done) {

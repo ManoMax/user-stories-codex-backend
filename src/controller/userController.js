@@ -7,24 +7,31 @@ const HTTP_CODE_BAD_REQUEST = 400;
 const HTTP_CODE_UNAUTHORIZED = 401;
 const HTTP_CODE_NOT_FOUND = 404;
 
-const TestController = {
-  helloWorld(req, res) {
-    res.status(HTTP_CODE_OK).send( { confirm: 'Hello World' })
-  },
+const UserController = {
+  home(req, res) {
+    let user = req.user;
 
-  async index(req, res) {
-    const users = await User.find();
+    let userDTO = {
+      name: user.name,
+      foto: user.foto,
+      urlUser: user.urlUser,
+      cargo: user.cargo
+    }
 
-    return res.status(HTTP_CODE_OK).json(users);
+    res.status(HTTP_CODE_OK).send( userDTO );
   },
 
   async store(req, res) {
-    const { name, email, password, cargoAtual } = req.body;
+    const { name, email, password, cargo } = req.body;
 
     if (name === undefined ||
       email === undefined ||
       password === undefined ||
-      cargoAtual === undefined) return res.status(HTTP_CODE_BAD_REQUEST).json({ message: 'Preencha todos os campos.' });
+      cargo === undefined) return res.status(HTTP_CODE_BAD_REQUEST).json({ message: 'Preencha todos os campos.' });
+
+    if (cargo !== 'squad' && cargo !== 'membro') {
+      return res.status(HTTP_CODE_BAD_REQUEST).json({ message: "O campo de Cargo deve ser 'membro' ou 'squad'." });
+    }
 
     let user = await User.findOne({ email });
 
@@ -52,13 +59,19 @@ const TestController = {
         email,
         password,
         urlUser,
-        cargoAtual
+        cargo
       });
 
       return res.status(HTTP_CODE_CREATED).json({ message: 'E-mail cadastrado com sucesso.' });
     } else {
       return res.status(HTTP_CODE_BAD_REQUEST).json({ message: 'E-mail já cadastrado.' });
     }
+  },
+
+  async index(req, res) {
+    const users = await User.find();
+
+    return res.status(HTTP_CODE_OK).json(users);
   },
 
   async userPage(req, res) {
@@ -74,11 +87,11 @@ const TestController = {
         email: user.email,
         telefone: user.telefone,
         foto: user.foto,
-        cargoAtual: user.cargoAtual,
+        cargo: user.cargo,
         especialidades: user.especialidades,
         instagram: user.instagram,
         linkedin: user.linkedin,
-        aniversário: user.aniversário,
+        aniversario: user.aniversario,
         cpf: user.cpf,
         urlUser: user.urlUser
       }
@@ -109,8 +122,18 @@ const TestController = {
         user = await User.findByIdAndUpdate(user._id, {
           token_list: new_token_list
         });
+
+        let response = {
+          auth: true,
+          token: `Bearer ` + token,
+
+          name: user.name,
+          foto: user.foto,
+          urlUser: user.urlUser,
+          cargo: user.cargo
+        }
   
-        return res.status(HTTP_CODE_OK).json({ auth: true, token: `Bearer ` + token });
+        return res.status(HTTP_CODE_OK).json( response );
       } else {
         return res.status(HTTP_CODE_UNAUTHORIZED).json({ message: 'Senha inválida' });
       }
@@ -134,15 +157,14 @@ const TestController = {
       name,
       telefone,
       foto,
+      especialidades,
       instagram,
       linkedin,
-      aniversário,
+      aniversario,
       cpf,
       } = req.body;
       
     const urlUser = req.params.urlUser;
-
-    if (newUserData.telefone === undefined) return res.status(HTTP_CODE_BAD_REQUEST).json({ message: 'Preencha algum dos campos.' });
 
     let user = await User.findOne({ urlUser });
 
@@ -153,18 +175,27 @@ const TestController = {
     if (user._id.equals(req.userId)) {
 
       user = await User.findByIdAndUpdate(user._id, {
-        telefone: (telefone !== undefined) ? telefone : user.telefone,
-        name: (name !== undefined) ? name : user.name,
-        foto: (foto !== undefined) ? foto : user.foto,
-        instagram: (instagram !== undefined) ? instagram : user.instagram,
-        linkedin: (linkedin !== undefined) ? linkedin : user.linkedin,
-        aniversário: (aniversário !== undefined) ? aniversário : user.aniversário,
-        cpf: (cpf !== undefined) ? cpf : user.cpf,
+        telefone: (newUserData.telefone !== undefined) ? newUserData.telefone : user.telefone,
+        name: (newUserData.name !== undefined) ? newUserData.name : user.name,
+        foto: (newUserData.foto !== undefined) ? newUserData.foto : user.foto,
+        especialidades: (newUserData.especialidades !== undefined) ? newUserData.especialidades.split(' ') : undefined,
+        instagram: (newUserData.instagram !== undefined) ? newUserData.instagram : user.instagram,
+        linkedin: (newUserData.linkedin !== undefined) ? newUserData.linkedin : user.linkedin,
+        aniversario: (newUserData.aniversario !== undefined) ? newUserData.aniversario : user.aniversario,
+        cpf: (newUserData.cpf !== undefined) ? newUserData.cpf : user.cpf,
       })
-      return res.status(HTTP_CODE_OK).json({ message: 'Perfil alterado com sucesso.' });
+
+      user = await User.findOne({ urlUser });
+      let response = {
+        foto: user.foto,
+        cargo: user.cargo,
+
+        message: 'Perfil alterado com sucesso.'
+      }
+      return res.status(HTTP_CODE_OK).json( response );
     }
     return res.status(HTTP_CODE_UNAUTHORIZED).json({ message: 'Usuário não tem permissão.' });
   }
 };
 
-module.exports = TestController;
+module.exports = UserController;

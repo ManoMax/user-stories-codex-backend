@@ -14,19 +14,42 @@ const UserSchema = new Schema({
         type: String,
         required: true,
     },
-    is_enable: {
-        type: Boolean,
+    telefone: {
+        type: String,
         required: false,
-        default: false
+        default: null
     },
-    code: {
-        type: Number,
+    foto: {
+        type: String,
         required: false,
+        default: "https://imgur.com/du1Dm15"
     },
-    token_list: {
-        type: [String]
+    cargoAtual: {
+        type: String,
+        required: false,
+        default: "membro"
     },
-    id_fcm: {
+    especialidades: {
+        type: [String],
+        required: false,
+        default: []
+    },
+    instagram: {
+        type: String,
+        required: false,
+        default: null
+    },
+    linkedin: {
+        type: String,
+        required: false,
+        default: null
+    },
+    aniversário: {
+        type: Date,
+        required: false,
+        default: null
+    },
+    cpf: {
         type: String,
         required: false,
         default: null

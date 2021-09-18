@@ -1,5 +1,4 @@
 const User = require('../model/User');
-const Page = require('../model/Page');
 const jwt = require('jsonwebtoken');
 
 const HTTP_CODE_OK = 200;
@@ -20,31 +19,43 @@ const TestController = {
   },
 
   async store(req, res) {
-    const { name, email, password } = req.body;
+    const { name, email, password, cargoAtual } = req.body;
 
     if (name === undefined ||
       email === undefined ||
-      password === undefined) return res.status(HTTP_CODE_BAD_REQUEST).json({ message: 'Preencha todos os campos.' });
+      password === undefined ||
+      cargoAtual === undefined) return res.status(HTTP_CODE_BAD_REQUEST).json({ message: 'Preencha todos os campos.' });
 
     let user = await User.findOne({ email });
 
     if (!user) {
-      var urlUser = name.replace(/\s/g, '').toLowerCase()
+      var temporalUrl = name.replace(/\s/g, '').toLowerCase()
         .normalize('NFD').replace(/[\u0300-\u036f]/g, "");
+
+      let urlUser = temporalUrl;
+      let urlUnavailable = true;
+
+      while (urlUnavailable) {
+        let userWithThisURL = await User.findOne({ urlUser });
+
+        if (!userWithThisURL) {
+          urlUnavailable = false;
+        } else {
+          urlUser = temporalUrl;
+          let randonNum = Math.floor(Math.random() * 1001);
+          urlUser = temporalUrl + randonNum.toString();
+        }
+      }
 
       user = await User.create({
         name,
         email,
         password,
-        urlUser
+        urlUser,
+        cargoAtual
       });
 
-      page = await Page.create({
-        urlUser,
-        userID: user._id
-      })
-
-      return res.status(HTTP_CODE_CREATED).json(user);
+      return res.status(HTTP_CODE_CREATED).json({ message: 'E-mail cadastrado com sucesso.' });
     } else {
       return res.status(HTTP_CODE_BAD_REQUEST).json({ message: 'E-mail já cadastrado.' });
     }
@@ -53,12 +64,26 @@ const TestController = {
   async userPage(req, res) {
     const urlUser = req.params.urlUser;
 
-    let page = await Page.findOne({ urlUser });
+    let user = await User.findOne({ urlUser });
 
-    if (!page) {
+    if (!user) {
       return res.status(HTTP_CODE_NOT_FOUND).json({ message: 'Perfil não encontrado.' });
     } else {
-      return res.status(HTTP_CODE_OK).json(page);
+      dataPage = {
+        name: user.name,
+        email: user.email,
+        telefone: user.telefone,
+        foto: user.foto,
+        cargoAtual: user.cargoAtual,
+        especialidades: user.especialidades,
+        instagram: user.instagram,
+        linkedin: user.linkedin,
+        aniversário: user.aniversário,
+        cpf: user.cpf,
+        urlUser: user.urlUser
+      }
+
+      return res.status(HTTP_CODE_OK).json(dataPage);
     }
   },
 
@@ -105,20 +130,36 @@ const TestController = {
 
   async setPerfil(req, res) {
     // adicionar os demais campos
-    const { telefone } = req.body;
+    const newUserData = { 
+      name,
+      telefone,
+      foto,
+      instagram,
+      linkedin,
+      aniversário,
+      cpf,
+      } = req.body;
+      
     const urlUser = req.params.urlUser;
 
-    if (telefone === undefined) return res.status(HTTP_CODE_BAD_REQUEST).json({ message: 'Preencha algum dos campos.' });
+    if (newUserData.telefone === undefined) return res.status(HTTP_CODE_BAD_REQUEST).json({ message: 'Preencha algum dos campos.' });
 
-    let page = await Page.findOne({ urlUser });
+    let user = await User.findOne({ urlUser });
 
-    if (!page) {
+    if (!user) {
       return res.status(HTTP_CODE_BAD_REQUEST).json({ message: 'Perfil não encontrado.' });
     }
 
-    if (page.userID === req.userId) {
-      page = await Page.findByIdAndUpdate(page._id, {
-        telefone: telefone
+    if (user._id.equals(req.userId)) {
+
+      user = await User.findByIdAndUpdate(user._id, {
+        telefone: (telefone !== undefined) ? telefone : user.telefone,
+        name: (name !== undefined) ? name : user.name,
+        foto: (foto !== undefined) ? foto : user.foto,
+        instagram: (instagram !== undefined) ? instagram : user.instagram,
+        linkedin: (linkedin !== undefined) ? linkedin : user.linkedin,
+        aniversário: (aniversário !== undefined) ? aniversário : user.aniversário,
+        cpf: (cpf !== undefined) ? cpf : user.cpf,
       })
       return res.status(HTTP_CODE_OK).json({ message: 'Perfil alterado com sucesso.' });
     }

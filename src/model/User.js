@@ -24,10 +24,9 @@ const UserSchema = new Schema({
         required: false,
         default: "https://imgur.com/du1Dm15"
     },
-    cargoAtual: {
+    cargo: {
         type: String,
-        required: false,
-        default: "membro"
+        required: false
     },
     especialidades: {
         type: [String],
@@ -44,7 +43,7 @@ const UserSchema = new Schema({
         required: false,
         default: null
     },
-    aniversário: {
+    aniversario: {
         type: Date,
         required: false,
         default: null

@@ -40,7 +40,7 @@ authorize = (req, res, next, type) => {
 
         req.userId = decoded.idUser;
         req.user = user;
-        req.token = token
+        req.token = token;
         return next();
     })
 }

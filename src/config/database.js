@@ -4,9 +4,9 @@ const config = require('@config');
 module.exports = async () =>  {
     let DB_URL;
     console.log('hey ' + process.env.NODE_ENV.trim());
-    if (process.env.NODE_ENV.trim() === "prod") {
+    if (process.env.NODE_ENV.trim() === "production") {
         DB_URL = config.db.production;
-    } else if (process.env.NODE_ENV.trim() === "dev") {
+    } else if (process.env.NODE_ENV.trim() === "develop") {
         DB_URL = config.db.develop;
     } else {
         const MongoInMemory = require('mongodb-memory-server');

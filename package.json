@@ -4,11 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "set NODE_ENV=prod & node src/server.js",
-    "comment1": "Caso o comando acima não funcione, use: set set NODE_ENV=prod & node src/server.js",
+    "start": "set NODE_ENV=production & node src/server.js",
+    "comment1": "Caso o comando acima não funcione, use: set set NODE_ENV=production & node src/server.js",
     "test": "mocha test/test.js -r chai/register-assert",
-    "dev": "NODE_ENV=dev nodemon src/server.js",
-    "comment2": "Caso o comando acima não funcione, use: set NODE_ENV=dev&& nodemon src/server.js"
+    "dev": "NODE_ENV=develop nodemon src/server.js",
+    "comment2": "Caso o comando acima não funcione, use: set NODE_ENV=develop&& nodemon src/server.js"
   },
   "author": "",
   "license": "ISC",

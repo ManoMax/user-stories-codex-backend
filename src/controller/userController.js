@@ -1,4 +1,5 @@
 const User = require('../model/User');
+const Project = require('../model/Project');
 const jwt = require('jsonwebtoken');
 
 const HTTP_CODE_OK = 200;
@@ -82,6 +83,18 @@ const UserController = {
     if (!user) {
       return res.status(HTTP_CODE_NOT_FOUND).json({ message: 'Perfil não encontrado.' });
     } else {
+      let projAtivos = [];
+      let projFinalizados = [];
+
+      for(var i = 0; i < user.projAtivos.length ; i++) {
+        let project = await Project.find({ _id: user.projAtivos[i] })
+        projAtivos.push(project[0].name);
+      }
+      for(var i = 0; i < user.projFinalizados.length ; i++) {
+        let project = await Project.find({ _id: user.projFinalizados[i] })
+        projFinalizados.push(project[0].name);
+      }
+
       dataPage = {
         name: user.name,
         email: user.email,
@@ -93,7 +106,9 @@ const UserController = {
         linkedin: user.linkedin,
         aniversario: user.aniversario,
         cpf: user.cpf,
-        urlUser: user.urlUser
+        urlUser: user.urlUser,
+        projAtivos,
+        projFinalizados
       }
 
       return res.status(HTTP_CODE_OK).json(dataPage);

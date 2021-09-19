@@ -31,7 +31,7 @@ authorize = (req, res, next, type) => {
         const user = await User.findOne({ _id: decoded.idUser });
 
         if (!user)
-            return res.status(404).send({ error: 'Usuário não existe!' });
+            return res.status(404).send({ error: 'Usuário do Token não existe!' });
 
         const token_list = user.token_list;
         if (!token_list.includes(token)) {

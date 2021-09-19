@@ -22,7 +22,7 @@ const UserSchema = new Schema({
     foto: {
         type: String,
         required: false,
-        default: "https://imgur.com/du1Dm15"
+        default: "https://imgur.com/du1Dm15.png"
     },
     cargo: {
         type: String,

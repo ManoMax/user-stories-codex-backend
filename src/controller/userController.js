@@ -184,7 +184,7 @@ const UserController = {
     let user = await User.findOne({ urlUser });
 
     if (!user) {
-      return res.status(HTTP_CODE_BAD_REQUEST).json({ message: 'Perfil não encontrado.' });
+      return res.status(HTTP_CODE_NOT_FOUND).json({ message: 'Perfil não encontrado.' });
     }
 
     if (user._id.equals(req.userId)) {

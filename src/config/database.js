@@ -3,7 +3,6 @@ const config = require('@config');
 
 module.exports = async () =>  {
     let DB_URL;
-    console.log('hey ' + process.env.NODE_ENV.trim());
     if (process.env.NODE_ENV.trim() === "production") {
         DB_URL = config.db.production;
     } else if (process.env.NODE_ENV.trim() === "develop") {

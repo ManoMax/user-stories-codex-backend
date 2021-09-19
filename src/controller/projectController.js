@@ -62,6 +62,22 @@ const ProjectController = {
         integrantes
       });
 
+      let projId = project._id;
+      integrantes.forEach(async userID => {
+        let _id = userID;
+        
+
+        if (project.ativo) {
+          user = await User.findByIdAndUpdate(_id, {
+            $push: { projAtivos: projId }
+          })
+        } else {
+          user = await User.findByIdAndUpdate(_id, {
+            $push: { projFinalizados: projId }
+          })
+        }
+      })
+
       response = {
         usuariosCadastrados,
         usuariosNaoEncontrados,

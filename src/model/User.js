@@ -61,7 +61,17 @@ const UserSchema = new Schema({
         type: [String],
         required: false,
         default: []
-    }
+    },
+    projAtivos: {
+        type: [String],
+        required: false,
+        default: []
+    },
+    projFinalizados: {
+        type: [String],
+        required: false,
+        default: []
+    },
 },
     {
         timestamps: true,

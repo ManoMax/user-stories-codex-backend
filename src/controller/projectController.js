@@ -1,4 +1,5 @@
 const Project = require('../model/Project');
+const User = require('../model/User');
 
 const HTTP_CODE_OK = 200;
 const HTTP_CODE_CREATED = 201;
@@ -13,16 +14,43 @@ const ProjectController = {
       return res.status(HTTP_CODE_UNAUTHORIZED).json({ message: 'Usuário não tem permissão para criar um Projeto.' });
     }
 
-    let { name, inicio, termino, ativo } = req.body;
+    let { name, inicio, termino, ativo, integrantes } = req.body;
 
     if (name === undefined ||
       inicio === undefined ||
       termino === undefined ||
       ativo === undefined) return res.status(HTTP_CODE_BAD_REQUEST).json({ message: 'Preencha todos os campos.' });
 
+    if (integrantes.length === 0) {
+      return res.status(HTTP_CODE_BAD_REQUEST).json({ message: 'O projeto deve conter ao menos 1 integrante.' });
+    }
+
     let project = await Project.findOne({ name });
 
     if (!project) {
+      let user;
+      let usuariosCadastrados = [];
+      let usuariosCadastrados2 = [];
+      let usuariosNaoEncontrados = [];
+
+      for (var i = 0; i < integrantes.length; i++) {
+        let name = integrantes[i];
+        user = await User.findOne({ name });
+
+        if (user === null) {
+          usuariosNaoEncontrados.push(name);
+        } else {
+          usuariosCadastrados.push(user._id);
+          usuariosCadastrados2.push(user.name);
+        }
+      }
+
+      if (usuariosCadastrados.length === 0) {
+        return res.status(HTTP_CODE_BAD_REQUEST).json({ message: 'O sistema não encontrou nenhum usuário com o(s) nome(s) indicado(s).' });
+      }
+
+      integrantes = usuariosCadastrados;
+      usuariosCadastrados = usuariosCadastrados2;
 
       let idProj = await Project.countDocuments();
       project = await Project.create({
@@ -30,10 +58,17 @@ const ProjectController = {
         inicio,
         termino,
         ativo,
-        idProj
+        idProj,
+        integrantes
       });
 
-      return res.status(HTTP_CODE_CREATED).json({ message: 'Projeto cadastrado com sucesso.' });
+      response = {
+        usuariosCadastrados,
+        usuariosNaoEncontrados,
+        message: 'Projeto cadastrado com sucesso.'
+      }
+
+      return res.status(HTTP_CODE_CREATED).json( response );
     } else {
       return res.status(HTTP_CODE_BAD_REQUEST).json({ message: 'Nome de Projeto já cadastrado.' });
     }

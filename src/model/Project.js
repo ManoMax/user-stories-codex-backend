@@ -19,7 +19,11 @@ const ProjectSchema = new Schema({
     },
     ativo: {
         type: Boolean,
-        required: false
+        required: true
+    },
+    integrantes: {
+        type: [String],
+        required: true
     }
 },
     {

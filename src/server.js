@@ -4,7 +4,7 @@ const app = require('@app');
 const config = require('@config');
 const databaseConfig = require('./config/database');
 
-var server = app.listen(config.app.port, (err) => {
+var server = app.listen(process.env.PORT || config.app.port, (err) => {
   if (err) {
     return console.log(err);
   }

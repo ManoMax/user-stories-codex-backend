@@ -1,4 +1,5 @@
 const Project = require('../model/Project');
+const { findById } = require('../model/User');
 const User = require('../model/User');
 
 const HTTP_CODE_OK = 200;
@@ -133,6 +134,23 @@ const ProjectController = {
       })
 
       project = await Project.findOne({ idProj });
+
+      if (project.ativo === false) {
+        for (var i = 0 ; i < project.integrantes.length ; i++) {
+          await User.findOneAndUpdate({ _id: project.integrantes[i]}, {
+            $pull: { projAtivos: project._id },
+            $push: { projFinalizados: project._id }
+          })
+        }
+      } else {
+        for (var i = 0 ; i < project.integrantes.length ; i++) {
+          await User.findOneAndUpdate({ _id: project.integrantes[i]}, {
+            $push: { projAtivos: project._id },
+            $pull: { projFinalizados: project._id }
+          })
+        }
+      }
+
       let response = {
         name,
         inicio,
